@@ -21,15 +21,15 @@ public class TweetSammlungImpl implements TweetSammlung{
     @Override
     public void ingest(String tweet) {
         List<String> tweets = TweetSammlung.tokenize(tweet);
-
+        tweetOrig.add(tweet);
         for (String s:
              tweets) {
-            tweetOrig.add(s);
+
             String[] tweetSplit = s.split(" ");
             for (String word:
                  tweetSplit) {
                 if (tweetCounter.get(word) == null) {
-                    tweetCounter.put(word, 0);
+                    tweetCounter.put(word, 1);
                 } else {
                     tweetCounter.replace(word, tweetCounter.get(word)+1);
                 }
@@ -114,6 +114,26 @@ public class TweetSammlungImpl implements TweetSammlung{
 
     @Override
     public Iterator<Pair<String, Integer>> topTweets() {
-        return null;
+        List<Pair<String, Integer>> count = new LinkedList<>();
+
+        for (String s : tweetOrig) {
+            String[] tweetSplitted = s.split(" ");
+            int buzzAnz = 0;
+            for (String word: tweetSplitted) {
+                if (tweetCounter.containsKey(word)){
+                    buzzAnz += tweetCounter.get(word);
+                }
+            }
+            count.add(Pair.of(s, buzzAnz));
+        }
+
+        count.sort(new Comparator<Pair<String, Integer>>() {
+            @Override
+            public int compare(Pair<String, Integer> o1, Pair<String, Integer> o2) {
+                return Integer.compare(o2.getRight(), o1.getRight());
+            }
+        });
+
+        return count.iterator();
     }
 }
